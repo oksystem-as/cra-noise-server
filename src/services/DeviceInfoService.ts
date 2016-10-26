@@ -9,7 +9,7 @@ class DeviceInfoService {
     private deviceData: LokiCollection<DeviceInfo>;
 
     constructor() {
-        this.deviceData = DBLoki.deviceData;
+        //this.deviceData = DBLoki.deviceData;
     }
 
     rootGET(req: any, res: ServerResponse, next: any) {

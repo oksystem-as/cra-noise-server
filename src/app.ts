@@ -5,25 +5,18 @@ import * as swaggerTools from "swagger-tools";
 import * as jsYaml from "js-yaml";
 import * as fs from "fs";
 import * as express from "express";
-import { LoadDeviceInfo } from "./services/LoadDeviceInfo";
+import { SaveStatistics } from "./services/SaveStatistics";
 import { LoadDevideConfig, CRaApiConfig } from "./Config";
 import * as winston from "winston";
 var expressWinston = require("express-winston");
 require("console-winston")();
 
-import { CRaService } from "./services/CRaService";
-import { DeSenseNoisePayloadResolver } from "./payloads/DeSenseNoisePayloadResolver";
-import { Payload, PayloadType } from "./payloads/payload";
-import { StatisticsUtils, StatisType } from "./utils/statis-utils";
-import { DateUtils } from "./utils/utils";
-import { Sensor } from "./entity/sensor";
-
 namespace UpdateCache {
   export let devEUIs: string[];
 
   export function updateCache() {
-    let loadDeviceInfo = new LoadDeviceInfo();
-    loadDeviceInfo.updateAll(devEUIs);
+    //let loadDeviceInfo = new LoadDeviceInfo();
+    //loadDeviceInfo.updateAll(devEUIs);
   }
 }
 
@@ -50,25 +43,8 @@ class Server {
     this.configCache();
     this.routes();
     */
-    let devEUI = "0004A30B0019D0EA";
-    let cRaService = new CRaService();
-    let promise = cRaService.getDeviceInfo(devEUI, 10000);
-
-    promise.then((result) => {
-      let res = new DeSenseNoisePayloadResolver();
-      let sensor = new Sensor();
-      sensor.devEUI = devEUI;
-      sensor.payloadType = PayloadType.DeSenseNoise;
-      result.records.forEach((value) => {
-        let payload = res.resolve(value.payloadHex);
-        payload.createdAt = DateUtils.parseDate(value.createdAt);
-        payload.payloadType = sensor.payloadType;
-        sensor.payloads.push(payload);
-      });
-      StatisticsUtils.resolveLogAverangeListEvent(sensor, StatisType.DAY24).subscribe(list => {
-        console.log("resolveLogAverangeListEvent", list);
-      });
-    });
+    let loadStatistics = new SaveStatistics();
+    loadStatistics.loadAll(["0004A30B0019D0EA"]);
   }
 
   private configCache() {

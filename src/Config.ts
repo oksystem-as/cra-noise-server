@@ -10,7 +10,7 @@ export namespace LoadDevideConfig {
 }
 
 export namespace CRaApiConfig {
-    export const basePath = "http://api.pripoj.me";
+    export const basePath = "http://hndocker.oksystem.local:58080";
     export const deviceDetailBaseUrl = "/message/get/{devEUI}";
     export let token = "kBPIDfNdSfk8fkATerBa6ct6yshdPbOX";
 }

@@ -1,3 +1,5 @@
+import { StatisType } from "../utils/statis-utils";
+
 export class Result {
     _meta: Meta;
     records: Array<DeviceInfo>;
@@ -68,4 +70,11 @@ export interface Irrs {
 export interface LastRecord {
     devEUI: string;
     createdAt: Date;
+}
+
+export class StatisticsInfo {
+    devEUI: string;
+    statisType: StatisType;
+    time: Date;
+    logAverange: number;
 }
