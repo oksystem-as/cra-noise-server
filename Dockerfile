@@ -9,6 +9,7 @@ RUN rm Dockerfile
 RUN ls -l
 
 RUN npm install
+RUN npm run typings install
 RUN npm run grunt
 
 EXPOSE 8080
