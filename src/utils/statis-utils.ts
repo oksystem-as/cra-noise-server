@@ -9,13 +9,13 @@ import { RHF1S001Payload } from "../payloads/RHF1S001Payload";
 import { DeSenseNoisePayload } from "../payloads/DeSenseNoisePayload";
 
 export enum StatisType {
-    HOUR,
-    DAY6_22,
-    DAY18_22,
-    NIGHT22_6,
-    DAY24,
-    WEEK,
-    MONTH,
+    HOUR = <any>"HOUR",
+    DAY6_22 = <any>"DAY6_22",
+    DAY18_22 = <any>"DAY18_22",
+    NIGHT22_6 = <any>"NIGHT22_6",
+    DAY24 = <any>"DAY24",
+    WEEK = <any>"WEEK",
+    MONTH = <any>"MONTH",
 }
 
 /**
