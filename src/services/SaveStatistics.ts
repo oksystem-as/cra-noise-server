@@ -26,6 +26,7 @@ export class SaveStatistics {
     }
 
     load(devEUI: string) {
+        console.log("Počítám statistiku pro: " + devEUI);
         let cRaService = new CRaService();
         let promise = cRaService.getDeviceInfo(devEUI);
 
@@ -80,7 +81,7 @@ export class SaveStatistics {
     }
 
     private saveStatistics(statistics: { time: Date, logAverange: number }[], devEUI: string, statisType: StatisType) {
-        this.statisticsData.removeWhere((data) => data.devEUI === devEUI);
+        this.statisticsData.removeWhere((data) => data.devEUI === devEUI && data.statisType === statisType);
         statistics.forEach(statistic => {
             let time = statistic.time;
             let logAverange = statistic.logAverange;

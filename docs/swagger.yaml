@@ -2,53 +2,23 @@
 swagger: '2.0'
 info:
   version: 1.0.0
-  title: Summer Jam REST API
-  description: |
-    Summer Jam REST API je HTTP-based API umožňující programatický přístup k datům ze „soutěžních“ sensorů v síti LoRa, provozované Českými Radiokomunikacemi (ČRa). API umožňuje pouze čtení záznamů.
+  title: Statisitka hlukových senzorů
 schemes:
   - http
-host: localhost:8080
 basePath: /
 paths:
-  /message/get/{devEUI}:
+  /device/{devEUI}/statistics:
     get:
-      x-swagger-router-controller: "DeviceInfo"
+      x-swagger-router-controller: "Statistics"
       parameters:
         - name: devEUI
           in: path
           description: ID čidla / zařízení.
           type: string
           required: true
-        - name: token
+        - name: date
           in: query
-          description: Slouží k autorizaci requestu a je unikátní pro každý soutěžní team. Pro jeho vygenerování kontaktujte ČRa.
-          type: string
-          required: true
-        - name: limit
-          in: query
-          description: Omezení počtu vypsaných záznamů. Hodnota musí být přirozeným číslem (1,2,3…N).
-          type: string
-          required: false
-        - name: offset
-          in: query
-          description: Posunutí prvního vypsaného záznamu o N záznamů. Hodnota musí být nezáporné celé číslo (0,1,2,3…N)
-          default: '0'
-          type: string
-          required: false
-        - name: order
-          in: query
-          description: Řazení záznamů dle časového razítka. Povolené hodnoty jsou asc nebo desc
-          default: desc
-          type: string
-          required: false
-        - name: start
-          in: query
-          description: Omezení výpisu zpráv od konkrétního data. Formát 2016-01-01T01:50:50. Zprávy jsou ukládány v časovém pásmu Europe/Prague.
-          type: string
-          required: false
-        - name: stop
-          in: query
-          description: Omezení výpisu zpráv do konkrétního data. Formát 2016-01-01T01:50:50. Zprávy jsou ukládány v časovém pásmu Europe/Prague.
+          description: Bude vždy den (tj. bez casu resp. k pulnoci). Pokud je parametr zadaný tak se v response vrací jen jeden interval zpětně pro každý typ statistiky.
           type: string
           required: false
       operationId: "rootGET"
@@ -56,91 +26,45 @@ paths:
         - application/json
       responses:
         200:
-          description: Slouží k výpisu jednotlivých zpráv z konkrétního zařízení.
+          description: Vrací vypočítané statistiky pro dané datum. Vrací tyto typy statistik - HOUR, DAY6_22, DAY18_22, NIGHT22_6, DAY24, WEEK, MONTH
           schema:
             type: object
             properties:
-              _meta:
-                $ref: '#/definitions/_meta'
-              records:
+              devEUI:
+                $ref: '#/definitions/devEUI'
+              statistics:
                 type: array
                 items:
-                  $ref: '#/definitions/DeviceInfo'
+                  $ref: '#/definitions/statistics'
 definitions:
-  _meta:
+  devEUI:
+    type: string
+    description: ID čidla / zařízení
+  statistics:
     type: object
     properties:
-      status:
+      type:
         type: string
-      count:
-        type: integer
-  DeviceInfo:
-    type: object
-    properties:
-      createdAt:
-        type: string
-        description: Časové razítko určující, kdy došlo k přijetí zprávy. Řetězec je konstruován dle standardu ISO-8601. Časové pásmo je UTC
-      devEUI:
-        type: string
-        description: ID čidla / zařízení
-      fPort:
-        type: integer
-        description: Komunikační port v rámci LoRaWAN protokolu
-      fCntUp:
-        type: integer
-        description: Uplink counter paketu
-      aDRbit:
-        type: integer
-      fCntDn:
-        type: integer
-        description: Downlink counter paketu
-      payloadHex:
-        type: string
-        description: Payload zprávy. Obsah je hexadecimální kód pro jehož parsování použijte dokumentaci k danému zařízení / čidlu.
-      micHex:
-        type: string
-        description: Message integrity check v HEX kódu
-      lrrRSSI:
-        type: string
-        description: Hodnota přijatého signálu z koncového zařízení na nejbližší GateWay
-      lrrSNR:
-        type: string
-        description: Hodnota odstupu signálu od šumu z koncového zařízení na nejbližší GateWay
-      spFact:
-        type: integer
-        description: Hodnota spreading factoru v komunikaci od koncového zařízení
-      subBand:
-        type: string  
-        description: Použitý subband v rámci 868 MHz pásma
-      channel:
-        type: string
-        description: Použitý kanál v rámci 868 MHz pásma
-      devLrrCnt:
-        type: integer
-        description: Počet GateWays, které danou zprávu zachytily
-      lrrid:
-        type: string
-        description: Identifikátor nejbližší GateWay
-      lrrLAT:
-        type: string
-        description: LAT souřadnice nejbližší Gateway, která zprávu zachytila
-      lrrLON:
-        type: string
-        description: LON souřadnice nejbližší Gateway, která zprávu zachytila
-      lrrs:
+        enum:
+        - HOUR,
+        - DAY6_22
+        - DAY18_22
+        - NIGHT22_6
+        - DAY24
+        - WEEK
+        - MONTH  
+        description: Typ statistiky.
+      avgValues:
         type: array
-        description: Pole s Gateways, které zprávu zachytily. Pole obsahuje maximálně 3 záznamy. Každý záznam obsahuje Lrrid, LrrRSSI, LrrSNR
+        description: Samotná statistická data.
         items:
-          $ref: '#/definitions/lrrs'
-  lrrs:
+          $ref: '#/definitions/avgValues'
+  avgValues:
     type: object
     properties:
-      Lrrid:
+      date:
         type: string
-        description: Identifikátor GateWay
-      LrrRSSI:
+        description: Celá hodina pro kterou platí spočtený průměr.
+      avgValue:
         type: string
-        description: Hodnota přijatého signálu z koncového zařízení na GateWay
-      LrrSNR:
-        type: string
-        description: Hodnota odstupu signálu od šumu z koncového zařízení na GateWay
+        description: Průměrná hodnota.

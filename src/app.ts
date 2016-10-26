@@ -15,8 +15,8 @@ namespace UpdateCache {
   export let devEUIs: string[];
 
   export function updateCache() {
-    //let loadDeviceInfo = new LoadDeviceInfo();
-    //loadDeviceInfo.updateAll(devEUIs);
+    let loadStatistics = new SaveStatistics();
+    loadStatistics.loadAll(devEUIs);
   }
 }
 
@@ -31,7 +31,7 @@ class Server {
   constructor() {
     //create expressjs application
     this.app = express();
-    /*
+
     this.loggerConfig();
 
     this.app.use((req, res, next) => {
@@ -42,9 +42,6 @@ class Server {
     });
     this.configCache();
     this.routes();
-    */
-    let loadStatistics = new SaveStatistics();
-    loadStatistics.loadAll(["0004A30B0019D0EA"]);
   }
 
   private configCache() {
@@ -56,6 +53,7 @@ class Server {
     UpdateCache.devEUIs = cacheConfig.devEUIs;
 
     UpdateCache.updateCache();
+    /*
     setInterval(function() {
       try {
         UpdateCache.updateCache();
@@ -63,6 +61,7 @@ class Server {
         console.error(error);
       }
     }, LoadDevideConfig.updateInterval);
+    */
   }
 
   private routes() {
