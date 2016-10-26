@@ -21,27 +21,35 @@ export class SaveStatistics {
         this.statisticsData = DBLoki.statisticsData;
     }
 
-    loadAll(devEUIs: string[]) {
-        devEUIs.forEach(devEUI => this.load(devEUI));
+    loadAll(devEUIs: string[], mock: boolean) {
+        devEUIs.forEach(devEUI => this.load(devEUI, mock));
     }
 
-    load(devEUI: string) {
+    load(devEUI: string, mock: boolean) {
         console.log("Počítám statistiku pro: " + devEUI);
         let cRaService = new CRaService();
         let promise = cRaService.getDeviceInfo(devEUI);
 
         promise.then((result) => {
-            this.processResult(result, devEUI);
+            this.processResult(result, devEUI, mock);
         });
     }
 
-    private processResult(result: Result, devEUI: string) {
+    private processResult(result: Result, devEUI: string, mock: boolean) {
         let res = new DeSenseNoisePayloadResolver();
         let sensor = new Sensor();
         sensor.devEUI = devEUI;
         sensor.payloadType = PayloadType.DeSenseNoise;
         result.records.forEach((value) => {
-            let payload = res.resolve(value.payloadHex);
+            let payload;
+            if (mock) {
+                payload = { noise: Math.floor(((Math.random() * 100))),
+                            battery: Math.floor(((Math.random() * 100))),
+                            rssi: Math.floor(((Math.random() * 100))),
+                            snr: Math.floor(((Math.random() * 100))) };
+            } else {
+                payload = res.resolve(value.payloadHex);
+            }
             payload.createdAt = DateUtils.parseDate(value.createdAt);
             payload.payloadType = sensor.payloadType;
             sensor.payloads.push(payload);

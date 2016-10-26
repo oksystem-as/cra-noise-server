@@ -13,10 +13,12 @@ require("console-winston")();
 
 namespace UpdateCache {
   export let devEUIs: string[];
+  export let mockDevEUIs: string[];
 
   export function updateCache() {
     let loadStatistics = new SaveStatistics();
-    loadStatistics.loadAll(devEUIs);
+    loadStatistics.loadAll(devEUIs, false);
+    loadStatistics.loadAll(mockDevEUIs, true);
   }
 }
 
@@ -51,6 +53,7 @@ class Server {
       CRaApiConfig.token = cacheConfig.token;
     }
     UpdateCache.devEUIs = cacheConfig.devEUIs;
+    UpdateCache.mockDevEUIs = cacheConfig.mockDevEUIs;
 
     UpdateCache.updateCache();
     /*
