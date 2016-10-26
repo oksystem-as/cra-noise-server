@@ -1,0 +1,17 @@
+{
+  "globalDependencies": {
+    "es6-shim": "registry:dt/es6-shim#0.31.2+20160602141504",
+    "express": "registry:dt/express#4.0.0+20160317120654",
+    "express-serve-static-core": "registry:dt/express-serve-static-core#0.0.0+20160322035842",
+    "js-yaml": "registry:dt/js-yaml#3.5.2+20160316171810",
+    "lokijs": "registry:dt/lokijs#0.0.0+20160316155526",
+    "mime": "registry:dt/mime#0.0.0+20160316155526",
+    "node": "registry:dt/node#4.0.0+20160319033040",
+    "serve-static": "registry:dt/serve-static#0.0.0+20160317120654",
+    "winston": "registry:dt/winston#0.0.0+20160417152829"
+  },
+  "dependencies": {
+    "request": "github:louy/typed-request#40ab1aacbd0540b1fae02f89c8f94427524e27dc",
+    "swagger-tools": "github:swissspidy/typed-swagger-tools/swagger-tools.d.ts#5fb3f2956a1a3aaae4fe3158b75e665068e631ff"
+  }
+}
