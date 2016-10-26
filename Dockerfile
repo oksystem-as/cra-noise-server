@@ -8,7 +8,8 @@ COPY ./ /usr/src/cra-noise-server
 RUN rm Dockerfile
 RUN ls -l
 
-RUN npm install --production
+RUN npm install
+RUN npm run grunt
 
 EXPOSE 8080
 CMD [ "npm", "start" ]
