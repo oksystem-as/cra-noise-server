@@ -18,17 +18,62 @@ export enum StatisType {
     MONTH = <any>"MONTH",
 }
 
+export class Statistics {
+    statisType: StatisType;
+    statistic: Statistic[];
+}
+
+export class Statistic {
+    time: Date;
+    logAverange: number;
+}
+
 /**
  * utility pro vypocet statistik
  */
 export class StatisticsUtils {
 
     /**
+     * Pro zadany list statistic spocita log prumer vsech hodnot.
+     * napr. pokud chceme spocita prumer pro tyden, list bude obsahovat 7 statistik pro kazdy den v tydnu atp.
+     * return log. prumer vsech hodnot
+     */
+    public static resolveLogAverange(daysStatistic: Statistic[]): number {
+        let sumValue = 0;
+        let count = daysStatistic.length;
+
+        daysStatistic.forEach((statis) => {
+            let powValue = Math.pow(10, statis.logAverange / 10);
+            sumValue += powValue;
+        });
+
+        let logAverange = 10 * Math.log(sumValue / count) / Math.log(10);
+        return logAverange;
+    }
+
+    /**
+     * vstupni data roztridi dle intervalu zadaneho v parametru statisType
+     * Vraci Observable, ktery obsahuje jen jednu eventu a to list vsech objektu obsahujici vsechny log. prumery
+     * return Observable<{ time: Date, logAverange: number }>
+     */
+    public static resolveAllLogAverangeListEvent(data: Sensor): Observable<Statistics[]> {
+        return Observable.forkJoin(
+            this.resolveLogAverangeListEvent(data, StatisType.HOUR     ).map(data => <Statistics>{statisType: StatisType.HOUR, statistic: data}),
+            this.resolveLogAverangeListEvent(data, StatisType.DAY18_22 ).map(data => <Statistics>{statisType: StatisType.DAY18_22, statistic: data}),
+            this.resolveLogAverangeListEvent(data, StatisType.DAY24    ).map(data => <Statistics>{statisType: StatisType.DAY24, statistic: data}),
+            this.resolveLogAverangeListEvent(data, StatisType.DAY6_22  ).map(data => <Statistics>{statisType: StatisType.DAY6_22, statistic: data}),
+            this.resolveLogAverangeListEvent(data, StatisType.NIGHT22_6).map(data => <Statistics>{statisType: StatisType.NIGHT22_6, statistic: data}),
+            this.resolveLogAverangeListEvent(data, StatisType.WEEK     ).map(data => <Statistics>{statisType: StatisType.WEEK, statistic: data}),
+            this.resolveLogAverangeListEvent(data, StatisType.MONTH    ).map(data => <Statistics>{statisType: StatisType.MONTH, statistic: data}),
+        );
+    }
+
+    /**
      * vstupni data roztridi dle intervalu zadaneho v parametru statisType
      * Vraci Observable, ktery obsahuje jen jednu eventu a to list vsech objektu obsahujici k danemu datu log. prumer
      * return Observable<{ time: Date, logAverange: number }>
      */
-    public static resolveLogAverangeListEvent(data: Sensor, statisType: StatisType): Observable<{ time: Date, logAverange: number }[]> {
+    public static resolveLogAverangeListEvent(data: Sensor, statisType: StatisType): Observable<Statistic[]> {
         return this.resolveLogAverangeObjEvents(data, statisType).toArray();
     }
 
@@ -37,16 +82,16 @@ export class StatisticsUtils {
      * Vraci Observable, kde eventy jsou objekty obsahujici k danemu datu log. prumer
      * return Observable<{ time: Date, logAverange: number }>
      */
-    public static resolveLogAverangeObjEvents(data: Sensor, statisType: StatisType): Observable<{ time: Date, logAverange: number }> {
+    public static resolveLogAverangeObjEvents(data: Sensor, statisType: StatisType): Observable<Statistic> {
         return this.groupByTime(data, statisType).flatMap(group => group.toArray()).map(group => {
             let groupTime = group[0].createdAt;
             let sumValue = 0;
             let count = group.length;
 
             group.forEach((data) => {
-                let powValue = Math.pow(10, this.getValue(data) / 10)
+                let powValue = Math.pow(10, this.getValue(data) / 10);
                 sumValue += powValue;
-            })
+            });
 
             let logAverange = 10 * Math.log(sumValue / count) / Math.log(10);
 
@@ -59,13 +104,13 @@ export class StatisticsUtils {
      * Vraci Observable, kde eventy jsou Observable s objekty obsahujici k danemu datu log. prumer
      * return Observable<Observable<{ time: Date, logAverange: number }>>
      */
-    public static resolveLogAverangeObsEvents(data: Sensor, statisType: StatisType): Observable<Observable<{ time: Date, logAverange: number }>> {
+    public static resolveLogAverangeObsEvents(data: Sensor, statisType: StatisType): Observable<Observable<Statistic>> {
         return this.groupByTime(data, statisType).map(group => {
             // console.log('group: ', group);
 
             // uprava value a pridani count
             let powDataStream = group.map((data, idx) => {
-                let powValue = Math.pow(10, (this.getValue(data) / 10))
+                let powValue = Math.pow(10, (this.getValue(data) / 10));
                 let powObj = { count: idx + 1, time: data.createdAt, powValue: powValue, sumValue: powValue };
                 return powObj;
             });
@@ -81,11 +126,11 @@ export class StatisticsUtils {
                 // console.log(' [datax]: ', data);
                 let avgObj = { time: data.time, logAverange: 10 * Math.log(data.sumValue / data.count) / Math.log(10) };
                 return avgObj;
-            })
+            });
 
             // zobrazeni a spusteni straemu
             return logAvgDataStream;
-        })
+        });
     }
 
     private static groupByTime(data: Sensor, statisType: StatisType): Observable<GroupedObservable<number, Payload>> {
@@ -144,7 +189,7 @@ export class RxUtils {
     public static groupByHours(data: Payload[]): Observable<GroupedObservable<number, Payload>> {
         var source = Observable.from(data).groupBy(
             data => {
-                return DateUtils.getHourFlatDate(data.createdAt).getTime()
+                return DateUtils.getHourFlatDate(data.createdAt).getTime();
             },
             data => {
                 data.createdAt = DateUtils.getHourFlatDate(data.createdAt);
@@ -156,7 +201,7 @@ export class RxUtils {
     public static groupByDays(data: Payload[]): Observable<GroupedObservable<number, Payload>> {
         var source = Observable.from(data).groupBy(
             data => {
-                return DateUtils.getDayFlatDate(data.createdAt).getTime()
+                return DateUtils.getDayFlatDate(data.createdAt).getTime();
             },
             data => {
                 data.createdAt = DateUtils.getDayFlatDate(data.createdAt);
@@ -168,7 +213,7 @@ export class RxUtils {
     public static groupByMonth(data: Payload[]): Observable<GroupedObservable<number, Payload>> {
         var source = Observable.from(data).groupBy(
             data => {
-                return DateUtils.getMonthFlatDate(data.createdAt).getTime()
+                return DateUtils.getMonthFlatDate(data.createdAt).getTime();
             },
             data => {
                 data.createdAt = DateUtils.getMonthFlatDate(data.createdAt);
@@ -180,7 +225,7 @@ export class RxUtils {
     public static groupByWeek(data: Payload[]): Observable<GroupedObservable<number, Payload>> {
         var source = Observable.from(data).groupBy(
             data => {
-                return DateUtils.getWeekFlatDate(data.createdAt).getTime()
+                return DateUtils.getWeekFlatDate(data.createdAt).getTime();
             },
             data => {
                 data.createdAt = DateUtils.getWeekFlatDate(data.createdAt);
@@ -191,10 +236,10 @@ export class RxUtils {
 
     public static groupByDay(data: Payload[]): Observable<GroupedObservable<number, Payload>> {
         var source = Observable.from(data).filter(data => {
-            return DateUtils.isDay(data.createdAt)
+            return DateUtils.isDay(data.createdAt);
         }).groupBy(
             data => {
-                return DateUtils.getDayNightFlatDate(data.createdAt).getTime()
+                return DateUtils.getDayNightFlatDate(data.createdAt).getTime();
             },
             data => {
                 data.createdAt = DateUtils.getDayNightFlatDate(data.createdAt);
@@ -205,10 +250,10 @@ export class RxUtils {
 
     public static groupByNight(data: Payload[]): Observable<GroupedObservable<number, Payload>> {
         var source = Observable.from(data).filter(data => {
-            return !DateUtils.isDay(data.createdAt)
+            return !DateUtils.isDay(data.createdAt);
         }).groupBy(
             data => {
-                return DateUtils.getDayNightFlatDate(data.createdAt).getTime()
+                return DateUtils.getDayNightFlatDate(data.createdAt).getTime();
             },
             data => {
                 data.createdAt = DateUtils.getDayNightFlatDate(data.createdAt);
@@ -219,10 +264,10 @@ export class RxUtils {
 
     public static groupBy18_22(data: Payload[]): Observable<GroupedObservable<number, Payload>> {
         var source = Observable.from(data).filter(data => {
-            return DateUtils.isHours18_22(data.createdAt)
+            return DateUtils.isHours18_22(data.createdAt);
         }).groupBy(
             data => {
-                return DateUtils.get18_22FlatDate(data.createdAt).getTime()
+                return DateUtils.get18_22FlatDate(data.createdAt).getTime();
             },
             data => {
                 data.createdAt = DateUtils.get18_22FlatDate(data.createdAt);
