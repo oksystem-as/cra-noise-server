@@ -77,4 +77,6 @@ export class StatisticsInfo {
     statisType: StatisType;
     time: Date;
     logAverange: number;
+    isComplete: boolean;
+    count: number;
 }

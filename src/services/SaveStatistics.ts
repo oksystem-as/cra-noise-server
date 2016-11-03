@@ -3,7 +3,7 @@ import { Observable } from "rxjs/Observable";
 import { CRaService } from "./CRaService";
 import { DeSenseNoisePayloadResolver } from "../payloads/DeSenseNoisePayloadResolver";
 import { PayloadType } from "../payloads/payload";
-import { StatisticsUtils, StatisType } from "../utils/statis-utils";
+import { StatisticsUtils, StatisType, Statistic } from "../utils/statis-utils";
 import { DateUtils } from "../utils/utils";
 import { Sensor } from "../entity/sensor";
 import { Result, StatisticsInfo } from "./DeviceInfoValue";
@@ -88,17 +88,21 @@ export class SaveStatistics {
         });
     }
 
-    private saveStatistics(statistics: { time: Date, logAverange: number }[], devEUI: string, statisType: StatisType) {
+    private saveStatistics(statistics: Statistic[], devEUI: string, statisType: StatisType) {
         this.statisticsData.removeWhere((data) => data.devEUI === devEUI && data.statisType === statisType);
         statistics.forEach(statistic => {
             let time = statistic.time;
             let logAverange = statistic.logAverange;
-            let stat: StatisticsInfo = { devEUI: devEUI, statisType: statisType, time, logAverange };
+            let isComplete = statistic.isComplete;
+            let count = statistic.count;
+            let stat: StatisticsInfo = { devEUI: devEUI, statisType: statisType, time, logAverange, isComplete, count };
             console.log("Ukládám statistiku: "
                                 + "devEUI: " + stat.devEUI
                                 + ", statisType: " + stat.statisType
                                 + ", time: " + stat.time
-                                + ", logAverange: " + stat.logAverange);
+                                + ", logAverange: " + stat.logAverange
+                                + ", isComplete: " + stat.isComplete
+                                + ", count: " + stat.count);
             this.statisticsData.insert(stat);
         });
     }

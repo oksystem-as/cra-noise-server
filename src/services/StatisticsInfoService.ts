@@ -20,16 +20,16 @@ class StatisticsInfoService {
         res.setHeader("Content-Type", "application/json");
 
         let devEUI: string = req.devEUI.value;
-        let start: string = req.date.value;
+        let dateStr: string = req.date.value;
 
-        let startDate: Date;
-        if (start !== undefined && start !== null) {
-            startDate = DateUtils.getDayFlatDate(new Date(start));
+        let date: Date;
+        if (dateStr !== undefined && dateStr !== null) {
+            date = DateUtils.getDayFlatDate(new Date(dateStr));
         }
 
         let resultData;
-        if (startDate !== undefined && startDate !== null) {
-            resultData = this.getData(devEUI, startDate);
+        if (date !== undefined && date !== null) {
+            resultData = this.getData(devEUI, date);
         } else {
             resultData = this.getAllData(devEUI);
         }
@@ -38,47 +38,56 @@ class StatisticsInfoService {
     }
 
     private getData(devEUI: string, date: Date) {
-        let startDate = new Date(date);
-        startDate.setDate(startDate.getDate() + 1);
-        let lastMonthDate = new Date(startDate);
+        let lastMonthDate = new Date(date);
         lastMonthDate.setDate(lastMonthDate.getDate() - 30);
-        let lastWeekDate = new Date(startDate);
+        let lastWeekDate = new Date(date);
         lastWeekDate.setDate(lastWeekDate.getDate() - 7);
+        console.warn(date);
+        console.warn(lastMonthDate);
+        console.warn(lastWeekDate);
         let resultLast30 = this.statisticsData.chain().where((data) => data.devEUI === devEUI
                                                                     && data.statisType === StatisType.DAY24
-                                                                    && data.time <= startDate
+                                                                    && data.time <= date
                                                                     && data.time >= lastMonthDate)
                                                       .data()
                                                       .map(data => {
                                                         return {time: data.time, logAverange: data.logAverange };
                                                       });
 
-        let resultDay24 = this.statisticsData.chain().where((data) => data.devEUI === devEUI
+        let resultDay24 = this.statisticsData.chain().where((data) => {
+        if (data.devEUI === devEUI && data.statisType === StatisType.DAY6_22 && DateUtils.getDayFlatDate(data.time) >= date
+                                                                   && DateUtils.getDayFlatDate(data.time) <= date) {
+            console.warn("***************************");
+            console.warn(data.statisType);
+            console.warn(data.time);
+            console.warn(data.time >= date);
+            console.warn(data.time > date);
+            console.warn(data.time < date);
+            console.warn(data.time <= date);
+            console.warn("***************************");
+        }
+                                                               return data.devEUI === devEUI
                                                                    && data.statisType === StatisType.DAY24
-                                                                   && data.time <= startDate
-                                                                   && data.time > date);
+                                                                   && DateUtils.getDayFlatDate(data.time) >= date
+                                                                   && DateUtils.getDayFlatDate(data.time) <= date; });
         let resultDay622 = this.statisticsData.chain().where((data) => data.devEUI === devEUI
                                                                     && data.statisType === StatisType.DAY6_22
-                                                                    && data.time <= startDate
-                                                                    && data.time > date);
+                                                                    && DateUtils.getDayFlatDate(data.time) >= date
+                                                                    && DateUtils.getDayFlatDate(data.time) <= date);
         let resultDay1822 = this.statisticsData.chain().where((data) => data.devEUI === devEUI
                                                                      && data.statisType === StatisType.DAY18_22
-                                                                     && data.time <= startDate
-                                                                     && data.time > date);
-        let resultNight226 = this.statisticsData.chain().where((data) => {
-            if (data.devEUI === devEUI && data.statisType === StatisType.NIGHT22_6) {
-                console.log(data.time);
-            }
-                                                                      return data.devEUI === devEUI
+                                                                     && DateUtils.getDayFlatDate(data.time) >= date
+                                                                     && DateUtils.getDayFlatDate(data.time) <= date);
+        let resultNight226 = this.statisticsData.chain().where((data) => data.devEUI === devEUI
                                                                       && data.statisType === StatisType.NIGHT22_6
-                                                                      && data.time <= startDate
-                                                                      && data.time > date; });
+                                                                      && DateUtils.getDayFlatDate(data.time) >= date
+                                                                      && DateUtils.getDayFlatDate(data.time) <= date);
         let resultData = [];
         this.transformToResultData(resultDay24.data()).forEach(value => resultData.push(value));
         this.transformToResultData(resultDay622.data()).forEach(value => resultData.push(value));
         this.transformToResultData(resultDay1822.data()).forEach(value => resultData.push(value));
         this.transformToResultData(resultNight226.data()).forEach(value => resultData.push(value));
-
+/*
         if (resultLast30.length > 0) {
             let avgValueLast30 = StatisticsUtils.resolveLogAverange(resultLast30);
             resultData.push({ type: StatisType.MONTH, avgValues: [ { date: lastMonthDate, avgValue: avgValueLast30 } ] });
@@ -87,7 +96,7 @@ class StatisticsInfoService {
             let avgValueLast7 = StatisticsUtils.resolveLogAverange(resultLast7);
             resultData.push({ type: StatisType.WEEK, avgValues: [ { date: lastWeekDate, avgValue: avgValueLast7 } ] });
         }
-
+*/
         return resultData;
     }
 
@@ -96,11 +105,12 @@ class StatisticsInfoService {
         return this.transformToResultData(result.data());
     }
 
-    private transformToResultData(result: any[]): any[] {
+    private transformToResultData(result: StatisticsInfo[]): any[] {
         let resultMap = Observable.from(result)
-                            .groupBy(data => data.statisType)//.filter((value, index) => value.key === StatisType.MONTH)
+                            .groupBy(data => data.statisType)
                             .map(data => {
-                                let avgValues = data.map(it => { return { date: it.time, avgValue: it.logAverange }; });
+                                let avgValues = data.map(it => { return { date: it.time, avgValue: it.logAverange,
+                                                                          isComplete: it.isComplete, count: it.count }; });
                                 return { type: data.key, avgValues: avgValues };
                             });
 
@@ -110,16 +120,7 @@ class StatisticsInfoService {
             value.avgValues.forEach(avgValue => {
                 let date: Date = avgValue.date;
                 let dateSrt = date.toLocaleDateString() + "T" + date.toLocaleTimeString();
-                console.log("**********************************************************************");
-                console.log(date);
-                console.log(date.toDateString());
-                console.log(date.toTimeString());
-                console.log(date.toLocaleDateString());
-                console.log(date.toLocaleTimeString());
-                console.log(date.toString());
-                console.log(dateSrt);
-                console.log("**********************************************************************");
-                avgValues.push({ date: dateSrt, avgValue: avgValue.avgValue });
+                avgValues.push({ date: dateSrt, avgValue: avgValue.avgValue, isComplete: avgValue.isComplete, count: avgValue.count });
             });
             let statRes = { type: value.type, avgValues: avgValues };
             resultData.push(statRes);

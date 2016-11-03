@@ -26,6 +26,8 @@ export class Statistics {
 export class Statistic {
     time: Date;
     logAverange: number;
+    isComplete: boolean;
+    count: number;
 }
 
 /**
@@ -53,23 +55,6 @@ export class StatisticsUtils {
 
     /**
      * vstupni data roztridi dle intervalu zadaneho v parametru statisType
-     * Vraci Observable, ktery obsahuje jen jednu eventu a to list vsech objektu obsahujici vsechny log. prumery
-     * return Observable<{ time: Date, logAverange: number }>
-     */
-    public static resolveAllLogAverangeListEvent(data: Sensor): Observable<Statistics[]> {
-        return Observable.forkJoin(
-            this.resolveLogAverangeListEvent(data, StatisType.HOUR     ).map(data => <Statistics>{statisType: StatisType.HOUR, statistic: data}),
-            this.resolveLogAverangeListEvent(data, StatisType.DAY18_22 ).map(data => <Statistics>{statisType: StatisType.DAY18_22, statistic: data}),
-            this.resolveLogAverangeListEvent(data, StatisType.DAY24    ).map(data => <Statistics>{statisType: StatisType.DAY24, statistic: data}),
-            this.resolveLogAverangeListEvent(data, StatisType.DAY6_22  ).map(data => <Statistics>{statisType: StatisType.DAY6_22, statistic: data}),
-            this.resolveLogAverangeListEvent(data, StatisType.NIGHT22_6).map(data => <Statistics>{statisType: StatisType.NIGHT22_6, statistic: data}),
-            this.resolveLogAverangeListEvent(data, StatisType.WEEK     ).map(data => <Statistics>{statisType: StatisType.WEEK, statistic: data}),
-            this.resolveLogAverangeListEvent(data, StatisType.MONTH    ).map(data => <Statistics>{statisType: StatisType.MONTH, statistic: data}),
-        );
-    }
-
-    /**
-     * vstupni data roztridi dle intervalu zadaneho v parametru statisType
      * Vraci Observable, ktery obsahuje jen jednu eventu a to list vsech objektu obsahujici k danemu datu log. prumer
      * return Observable<{ time: Date, logAverange: number }>
      */
@@ -87,6 +72,13 @@ export class StatisticsUtils {
             let groupTime = group[0].createdAt;
             let sumValue = 0;
             let count = group.length;
+            let isComplete = this.isComplete(group, statisType);
+            if (!isComplete) {
+                console.warn(groupTime);
+                console.warn(data.devEUI);
+                console.warn(statisType);
+                console.warn("************************************************");
+            }
 
             group.forEach((data) => {
                 let powValue = Math.pow(10, this.getValue(data) / 10);
@@ -95,7 +87,7 @@ export class StatisticsUtils {
 
             let logAverange = 10 * Math.log(sumValue / count) / Math.log(10);
 
-            return { time: groupTime, logAverange: logAverange };
+            return { time: groupTime, logAverange: logAverange, isComplete: isComplete, count: count };
         });
     }
 
@@ -132,6 +124,51 @@ export class StatisticsUtils {
             }
             default: throw "Nepodporovany typ statistiky: " + statisType;
         }
+    }
+
+    private static isComplete(payload: Payload[], statisType: StatisType): boolean {
+        let intervalMeasurementS = 5 * 60;
+        let requiredMeasurement = 0.65;
+        let statisticInterval;
+        switch (statisType) {
+            case StatisType.HOUR: {
+                statisticInterval = (60 * 60);
+                break;
+            }
+            case StatisType.DAY6_22: {
+                statisticInterval = (16 * 60 * 60);
+                break;
+            }
+            case StatisType.DAY18_22: {
+                statisticInterval = (4 * 60 * 60);
+                break;
+            }
+            case StatisType.NIGHT22_6: {
+                statisticInterval = (8 * 60 * 60);
+                break;
+            }
+            case StatisType.DAY24: {
+                statisticInterval = (24 * 60 * 60);
+                break;
+            }
+            case StatisType.WEEK: {
+                statisticInterval = (7 * 24 * 60 * 60);
+                break;
+            }
+            case StatisType.MONTH: {
+                statisticInterval = (30 * 24 * 60 * 60);
+                break;
+            }
+            default: throw "Nepodporovany typ statistiky: " + statisType;
+        }
+        let totalMeas = statisticInterval / intervalMeasurementS;
+        let reqMeas = totalMeas * requiredMeasurement;
+        if (payload.length < Math.round(reqMeas)) {
+            console.warn("************************************************");
+            console.warn(Math.round(reqMeas));
+            console.warn(payload.length);
+        }
+        return payload.length >= Math.round(reqMeas);
     }
 
     private static getValue(payload: Payload): number {
