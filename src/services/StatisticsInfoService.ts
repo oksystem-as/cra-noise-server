@@ -128,7 +128,7 @@ class StatisticsInfoService {
             let avgValues = [];
             value.avgValues.forEach(avgValue => {
                 let date: Date = avgValue.date;
-                let dateSrt = date.toLocaleDateString() + "T" + date.toLocaleTimeString();
+                let dateSrt = date.toLocaleDateString("EU") + "T" + date.toLocaleTimeString("EU");
                 avgValues.push({ date: dateSrt, avgValue: avgValue.avgValue, isComplete: avgValue.isComplete, count: avgValue.count });
             });
             let statRes = { type: value.type, avgValues: avgValues };
