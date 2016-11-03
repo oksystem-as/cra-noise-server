@@ -98,7 +98,7 @@ class StatisticsInfoService {
 
     private transformToResultData(result: any[]): any[] {
         let resultMap = Observable.from(result)
-                            .groupBy(data => data.statisType)
+                            .groupBy(data => data.statisType)//.filter((value, index) => value.key === StatisType.MONTH)
                             .map(data => {
                                 let avgValues = data.map(it => { return { date: it.time, avgValue: it.logAverange }; });
                                 return { type: data.key, avgValues: avgValues };
@@ -107,7 +107,20 @@ class StatisticsInfoService {
         let resultData = [];
         resultMap.forEach(value => {
             let avgValues = [];
-            value.avgValues.forEach(avgValue => avgValues.push({ date: avgValue.date, avgValue: avgValue.avgValue }) );
+            value.avgValues.forEach(avgValue => {
+                let date: Date = avgValue.date;
+                let dateSrt = date.toLocaleDateString() + "T" + date.toLocaleTimeString();
+                console.log("**********************************************************************");
+                console.log(date);
+                console.log(date.toDateString());
+                console.log(date.toTimeString());
+                console.log(date.toLocaleDateString());
+                console.log(date.toLocaleTimeString());
+                console.log(date.toString());
+                console.log(dateSrt);
+                console.log("**********************************************************************");
+                avgValues.push({ date: dateSrt, avgValue: avgValue.avgValue });
+            });
             let statRes = { type: value.type, avgValues: avgValues };
             resultData.push(statRes);
         });

@@ -68,8 +68,15 @@ export class DateUtils {
         var tMilis: string = time[1];
 
         // "+"" znamena prevod na cislo
-        var date = new Date(+d[0], +d[1] - 1, +d[2], +t[0], +t[1] - new Date().getTimezoneOffset(), +t[2], +tMilis);
-        return date;
+        let dateUTC = new Date();
+        dateUTC.setUTCFullYear(+d[0]);
+        dateUTC.setUTCMonth(+d[1] - 1);
+        dateUTC.setUTCDate(+d[2]);
+        dateUTC.setUTCHours(+t[0]);
+        dateUTC.setUTCMinutes(+t[1]);
+        dateUTC.setUTCSeconds(+t[2]);
+        dateUTC.setUTCMilliseconds(+tMilis);
+        return dateUTC;
     }
 
     public static getWeek(date: Date) {

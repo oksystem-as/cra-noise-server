@@ -17,8 +17,12 @@ namespace UpdateCache {
 
   export function updateCache() {
     let loadStatistics = new SaveStatistics();
-    loadStatistics.loadAll(devEUIs, false);
-    loadStatistics.loadAll(mockDevEUIs, true);
+    if (devEUIs != null) {
+      loadStatistics.loadAll(devEUIs, false);
+    }
+    if (mockDevEUIs != null) {
+      loadStatistics.loadAll(mockDevEUIs, true);
+    }
   }
 }
 

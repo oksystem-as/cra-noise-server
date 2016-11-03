@@ -99,40 +99,6 @@ export class StatisticsUtils {
         });
     }
 
-    /**
-     * vstupni data roztridi dle intervalu zadaneho v parametru statisType
-     * Vraci Observable, kde eventy jsou Observable s objekty obsahujici k danemu datu log. prumer
-     * return Observable<Observable<{ time: Date, logAverange: number }>>
-     */
-    public static resolveLogAverangeObsEvents(data: Sensor, statisType: StatisType): Observable<Observable<Statistic>> {
-        return this.groupByTime(data, statisType).map(group => {
-            // console.log('group: ', group);
-
-            // uprava value a pridani count
-            let powDataStream = group.map((data, idx) => {
-                let powValue = Math.pow(10, (this.getValue(data) / 10));
-                let powObj = { count: idx + 1, time: data.createdAt, powValue: powValue, sumValue: powValue };
-                return powObj;
-            });
-
-            // // soucet value
-            let sumDataStream = powDataStream.reduce((a, b) => {
-                b.sumValue = b.powValue + a.sumValue;
-                return b;
-            });
-
-            // logaritm. prumer ze souctu a poctu polozek (jen pro danou hodinu)
-            let logAvgDataStream = sumDataStream.map((data, idx) => {
-                // console.log(' [datax]: ', data);
-                let avgObj = { time: data.time, logAverange: 10 * Math.log(data.sumValue / data.count) / Math.log(10) };
-                return avgObj;
-            });
-
-            // zobrazeni a spusteni straemu
-            return logAvgDataStream;
-        });
-    }
-
     private static groupByTime(data: Sensor, statisType: StatisType): Observable<GroupedObservable<number, Payload>> {
         // musim provest deep copy listu a v nem obs. objektu jinak dochazi k modifikaci objektu napric streamy 
         switch (statisType) {
