@@ -128,8 +128,8 @@ class StatisticsInfoService {
             let avgValues = [];
             value.avgValues.forEach(avgValue => {
                 let date: Date = avgValue.date;
-                //let dateSrt = date.toLocaleDateString("en-GB") + "T" + date.toLocaleTimeString("en-GB");
-                let dateSrt = this.twoDigits(date.getFullYear()) + "-" + this.twoDigits(date.getMonth()) + "-"
+                //let dateSrt = date.toLocaleDateString() + "T" + date.toLocaleTimeString();
+                let dateSrt = this.twoDigits(date.getFullYear()) + "-" + this.twoDigits(date.getMonth() + 1) + "-"
                               + this.twoDigits(date.getDate()) + "T" +
                               this.twoDigits(date.getHours()) + ":" + this.twoDigits(date.getMinutes()) + ":"
                               + this.twoDigits(date.getSeconds());
