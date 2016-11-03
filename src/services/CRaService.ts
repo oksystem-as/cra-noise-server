@@ -9,6 +9,7 @@ export class CRaService {
   private basePath = CRaApiConfig.basePath;
   private deviceDetailBaseUrl = CRaApiConfig.deviceDetailBaseUrl;
   private token = CRaApiConfig.token;
+  private limit = CRaApiConfig.limit;
 
   /**    
    * @param devEUI ID čidla / zařízení.
@@ -37,7 +38,7 @@ export class CRaService {
             queryParameters.token = this.token;
         }
 
-        if (limit !== undefined) {
+        if ( limit !== undefined) {
             queryParameters.limit = limit;
         }
 

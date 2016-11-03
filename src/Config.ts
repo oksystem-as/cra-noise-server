@@ -1,4 +1,4 @@
-/// <reference path="_all.d.ts" />
+﻿/// <reference path="_all.d.ts" />
 
 export namespace LoadDevideConfig {
     /** První datum od kterého se načítají údaje ze senzotů */
@@ -10,7 +10,11 @@ export namespace LoadDevideConfig {
 }
 
 export namespace CRaApiConfig {
-    export const basePath = "http://hndocker.oksystem.local:58080";
+
+  export const basePath = "http://hndocker.oksystem.local:58080";
+//    export const basePath = "https://api.pripoj.me/";
+
     export const deviceDetailBaseUrl = "/message/get/{devEUI}";
+    export const limit = 10000 ;
     export let token = "kBPIDfNdSfk8fkATerBa6ct6yshdPbOX";
 }
