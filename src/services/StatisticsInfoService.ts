@@ -128,13 +128,24 @@ class StatisticsInfoService {
             let avgValues = [];
             value.avgValues.forEach(avgValue => {
                 let date: Date = avgValue.date;
-                let dateSrt = date.toLocaleDateString("EU") + "T" + date.toLocaleTimeString("EU");
+                //let dateSrt = date.toLocaleDateString("en-GB") + "T" + date.toLocaleTimeString("en-GB");
+                let dateSrt = this.twoDigits(date.getFullYear()) + "-" + this.twoDigits(date.getMonth()) + "-"
+                              + this.twoDigits(date.getDate()) + "T" +
+                              this.twoDigits(date.getHours()) + ":" + this.twoDigits(date.getMinutes()) + ":"
+                              + this.twoDigits(date.getSeconds());
                 avgValues.push({ date: dateSrt, avgValue: avgValue.avgValue, isComplete: avgValue.isComplete, count: avgValue.count });
             });
             let statRes = { type: value.type, avgValues: avgValues };
             resultData.push(statRes);
         });
         return resultData;
+    }
+
+    private twoDigits(num: number): String {
+        if (num < 10) {
+            return "0" + num;
+        }
+        return num.toString();
     }
 }
 
