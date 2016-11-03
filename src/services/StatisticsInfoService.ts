@@ -45,14 +45,18 @@ class StatisticsInfoService {
         console.warn(date);
         console.warn(lastMonthDate);
         console.warn(lastWeekDate);
-        let resultLast30 = this.statisticsData.chain().where((data) => data.devEUI === devEUI
-                                                                    && data.statisType === StatisType.DAY24
-                                                                    && data.time <= date
-                                                                    && data.time >= lastMonthDate)
-                                                      .data()
-                                                      .map(data => {
-                                                        return {time: data.time, logAverange: data.logAverange };
-                                                      });
+        let resultLast30 = this.statisticsData
+                               .chain()
+                               .where((data) =>
+                                    data.devEUI === devEUI
+                                    && data.statisType === StatisType.DAY24
+                                    && DateUtils.getDayFlatDate(new Date(data.time)) > lastMonthDate
+                                    && DateUtils.getDayFlatDate(new Date(data.time)) <= date)
+                               .data()
+                               .map(data => {
+                                    return {time: data.time, logAverange: data.logAverange,
+                                            isComplete: data.isComplete, count: data.count };
+                               });
 
         let resultDay24 = this.statisticsData.chain().where((data) =>
                                      data.devEUI === devEUI
@@ -79,17 +83,33 @@ class StatisticsInfoService {
         this.transformToResultData(resultDay622.data()).forEach(value => resultData.push(value));
         this.transformToResultData(resultDay1822.data()).forEach(value => resultData.push(value));
         this.transformToResultData(resultNight226.data()).forEach(value => resultData.push(value));
-/*
+
         if (resultLast30.length > 0) {
             let avgValueLast30 = StatisticsUtils.resolveLogAverange(resultLast30);
-            resultData.push({ type: StatisType.MONTH, avgValues: [ { date: lastMonthDate, avgValue: avgValueLast30 } ] });
+            let isCompleteLast30 = resultLast30.length == 30 && resultLast30.find((value) => !value.isComplete) == null;
+            let countLast30 = this.countMes(resultLast30);
+            resultData.push({ type: StatisType.MONTH, avgValues: [ { date: lastMonthDate,
+                                                                     avgValue: avgValueLast30,
+                                                                     isComplete: isCompleteLast30,
+                                                                     count: countLast30 } ] });
 
-            let resultLast7 = resultLast30.filter(value => value.time >= lastWeekDate);
+            let resultLast7 = resultLast30.filter(value => DateUtils.getDayFlatDate(new Date(value.time)) > lastWeekDate);
             let avgValueLast7 = StatisticsUtils.resolveLogAverange(resultLast7);
-            resultData.push({ type: StatisType.WEEK, avgValues: [ { date: lastWeekDate, avgValue: avgValueLast7 } ] });
+            let isCompleteLast7 = resultLast7.length == 7 && resultLast7.find((value) => !value.isComplete) == null;
+            let countLast7 = this.countMes(resultLast7);
+            resultData.push({ type: StatisType.WEEK, avgValues: [ { date: lastWeekDate,
+                                                                    avgValue: avgValueLast7,
+                                                                    isComplete: isCompleteLast7,
+                                                                    count: countLast7 } ] });
         }
-*/
+
         return resultData;
+    }
+
+    private countMes(result: any[]): number {
+        var count = 0;
+        result.forEach((value) => count += value.count );
+        return count;
     }
 
     private getAllData(devEUI: string) {

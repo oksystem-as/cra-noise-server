@@ -73,12 +73,6 @@ export class StatisticsUtils {
             let sumValue = 0;
             let count = group.length;
             let isComplete = this.isComplete(group, statisType);
-            if (!isComplete) {
-                console.warn(groupTime);
-                console.warn(data.devEUI);
-                console.warn(statisType);
-                console.warn("************************************************");
-            }
 
             group.forEach((data) => {
                 let powValue = Math.pow(10, this.getValue(data) / 10);
@@ -163,11 +157,6 @@ export class StatisticsUtils {
         }
         let totalMeas = statisticInterval / intervalMeasurementS;
         let reqMeas = totalMeas * requiredMeasurement;
-        if (payload.length < Math.round(reqMeas)) {
-            console.warn("************************************************");
-            console.warn(Math.round(reqMeas));
-            console.warn(payload.length);
-        }
         return payload.length >= Math.round(reqMeas);
     }
 
