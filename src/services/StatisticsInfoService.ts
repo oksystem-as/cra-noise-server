@@ -42,9 +42,6 @@ class StatisticsInfoService {
         lastMonthDate.setDate(lastMonthDate.getDate() - 30);
         let lastWeekDate = new Date(date);
         lastWeekDate.setDate(lastWeekDate.getDate() - 7);
-        console.warn(date);
-        console.warn(lastMonthDate);
-        console.warn(lastWeekDate);
         let resultLast30 = this.statisticsData
                                .chain()
                                .where((data) =>
