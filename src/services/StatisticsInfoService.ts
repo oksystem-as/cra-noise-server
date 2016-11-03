@@ -54,34 +54,26 @@ class StatisticsInfoService {
                                                         return {time: data.time, logAverange: data.logAverange };
                                                       });
 
-        let resultDay24 = this.statisticsData.chain().where((data) => {
-        if (data.devEUI === devEUI && data.statisType === StatisType.DAY6_22 && DateUtils.getDayFlatDate(data.time) >= date
-                                                                   && DateUtils.getDayFlatDate(data.time) <= date) {
-            console.warn("***************************");
-            console.warn(data.statisType);
-            console.warn(data.time);
-            console.warn(data.time >= date);
-            console.warn(data.time > date);
-            console.warn(data.time < date);
-            console.warn(data.time <= date);
-            console.warn("***************************");
-        }
-                                                               return data.devEUI === devEUI
-                                                                   && data.statisType === StatisType.DAY24
-                                                                   && DateUtils.getDayFlatDate(data.time) >= date
-                                                                   && DateUtils.getDayFlatDate(data.time) <= date; });
-        let resultDay622 = this.statisticsData.chain().where((data) => data.devEUI === devEUI
-                                                                    && data.statisType === StatisType.DAY6_22
-                                                                    && DateUtils.getDayFlatDate(data.time) >= date
-                                                                    && DateUtils.getDayFlatDate(data.time) <= date);
-        let resultDay1822 = this.statisticsData.chain().where((data) => data.devEUI === devEUI
-                                                                     && data.statisType === StatisType.DAY18_22
-                                                                     && DateUtils.getDayFlatDate(data.time) >= date
-                                                                     && DateUtils.getDayFlatDate(data.time) <= date);
-        let resultNight226 = this.statisticsData.chain().where((data) => data.devEUI === devEUI
-                                                                      && data.statisType === StatisType.NIGHT22_6
-                                                                      && DateUtils.getDayFlatDate(data.time) >= date
-                                                                      && DateUtils.getDayFlatDate(data.time) <= date);
+        let resultDay24 = this.statisticsData.chain().where((data) =>
+                                     data.devEUI === devEUI
+                                     && data.statisType === StatisType.DAY24
+                                     && DateUtils.getDayFlatDate(new Date(data.time)) >= date
+                                     && DateUtils.getDayFlatDate(new Date(data.time)) <= date);
+        let resultDay622 = this.statisticsData.chain().where((data) =>
+                                     data.devEUI === devEUI
+                                     && data.statisType === StatisType.DAY6_22
+                                     && DateUtils.getDayFlatDate(new Date(data.time)) >= date
+                                     && DateUtils.getDayFlatDate(new Date(data.time)) <= date);
+        let resultDay1822 = this.statisticsData.chain().where((data) =>
+                                     data.devEUI === devEUI
+                                     && data.statisType === StatisType.DAY18_22
+                                     && DateUtils.getDayFlatDate(new Date(data.time)) >= date
+                                     && DateUtils.getDayFlatDate(new Date(data.time)) <= date);
+        let resultNight226 = this.statisticsData.chain().where((data) =>
+                                     data.devEUI === devEUI
+                                     && data.statisType === StatisType.NIGHT22_6
+                                     && DateUtils.getDayFlatDate(new Date(data.time)) >= date
+                                     && DateUtils.getDayFlatDate(new Date(data.time)) <= date);
         let resultData = [];
         this.transformToResultData(resultDay24.data()).forEach(value => resultData.push(value));
         this.transformToResultData(resultDay622.data()).forEach(value => resultData.push(value));
