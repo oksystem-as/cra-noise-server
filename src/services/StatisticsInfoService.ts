@@ -39,15 +39,17 @@ class StatisticsInfoService {
 
     private getData(devEUI: string, date: Date) {
         let lastMonthDate = new Date(date);
-        lastMonthDate.setDate(lastMonthDate.getDate() - 30);
+        lastMonthDate.setDate(lastMonthDate.getDate() - 30 + 1);
         let lastWeekDate = new Date(date);
-        lastWeekDate.setDate(lastWeekDate.getDate() - 7);
+        lastWeekDate.setDate(lastWeekDate.getDate() - 7 + 1);
+        // +1 je zde protože se započítává i zadaný den
+
         let resultLast30 = this.statisticsData
                                .chain()
                                .where((data) =>
                                     data.devEUI === devEUI
                                     && data.statisType === StatisType.DAY24
-                                    && DateUtils.getDayFlatDate(new Date(data.time)) > lastMonthDate
+                                    && DateUtils.getDayFlatDate(new Date(data.time)) >= lastMonthDate
                                     && DateUtils.getDayFlatDate(new Date(data.time)) <= date)
                                .data()
                                .map(data => {
@@ -85,16 +87,18 @@ class StatisticsInfoService {
             let avgValueLast30 = StatisticsUtils.resolveLogAverange(resultLast30);
             let isCompleteLast30 = resultLast30.length == 30 && resultLast30.find((value) => !value.isComplete) == null;
             let countLast30 = this.countMes(resultLast30);
-            resultData.push({ type: StatisType.MONTH, avgValues: [ { date: lastMonthDate,
+            let dateSrtLast30 = this.dateToString(lastMonthDate);
+            resultData.push({ type: StatisType.MONTH, avgValues: [ { date: dateSrtLast30,
                                                                      avgValue: avgValueLast30,
                                                                      isComplete: isCompleteLast30,
                                                                      count: countLast30 } ] });
 
-            let resultLast7 = resultLast30.filter(value => DateUtils.getDayFlatDate(new Date(value.time)) > lastWeekDate);
+            let resultLast7 = resultLast30.filter(value => DateUtils.getDayFlatDate(new Date(value.time)) >= lastWeekDate);
             let avgValueLast7 = StatisticsUtils.resolveLogAverange(resultLast7);
             let isCompleteLast7 = resultLast7.length == 7 && resultLast7.find((value) => !value.isComplete) == null;
             let countLast7 = this.countMes(resultLast7);
-            resultData.push({ type: StatisType.WEEK, avgValues: [ { date: lastWeekDate,
+            let dateSrtLast7 = this.dateToString(lastWeekDate);
+            resultData.push({ type: StatisType.WEEK, avgValues: [ { date: dateSrtLast7,
                                                                     avgValue: avgValueLast7,
                                                                     isComplete: isCompleteLast7,
                                                                     count: countLast7 } ] });
@@ -128,17 +132,19 @@ class StatisticsInfoService {
             let avgValues = [];
             value.avgValues.forEach(avgValue => {
                 let date: Date = avgValue.date;
-                //let dateSrt = date.toLocaleDateString() + "T" + date.toLocaleTimeString();
-                let dateSrt = this.twoDigits(date.getFullYear()) + "-" + this.twoDigits(date.getMonth() + 1) + "-"
-                              + this.twoDigits(date.getDate()) + "T" +
-                              this.twoDigits(date.getHours()) + ":" + this.twoDigits(date.getMinutes()) + ":"
-                              + this.twoDigits(date.getSeconds());
+                let dateSrt = this.dateToString(date);
                 avgValues.push({ date: dateSrt, avgValue: avgValue.avgValue, isComplete: avgValue.isComplete, count: avgValue.count });
             });
             let statRes = { type: value.type, avgValues: avgValues };
             resultData.push(statRes);
         });
         return resultData;
+    }
+
+    private dateToString(date: Date): String {
+        let dateSrt = this.twoDigits(date.getFullYear()) + "-" + this.twoDigits(date.getMonth() + 1) + "-" + this.twoDigits(date.getDate()) + "T" +
+                        this.twoDigits(date.getHours()) + ":" + this.twoDigits(date.getMinutes()) + ":" + this.twoDigits(date.getSeconds());
+        return dateSrt;
     }
 
     private twoDigits(num: number): String {
