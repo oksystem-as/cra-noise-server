@@ -21,17 +21,32 @@ export class SaveStatistics {
         this.statisticsData = DBLoki.statisticsData;
     }
 
-    loadAll(devEUIs: string[], mock: boolean) {
-        devEUIs.forEach(devEUI => this.load(devEUI, mock));
+    loadAll(devEUIs: string[], mock: boolean): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            let devEUIsComplete = Array<string>();
+            devEUIs.forEach(devEUI => {
+                this.load(devEUI, mock).then((result) => {
+                    if (devEUIsComplete.find((valeu) => valeu === result) == null) {
+                        devEUIsComplete.push(result);
+                    }
+                    if (devEUIsComplete.length == devEUIs.length) {
+                        resolve(true);
+                    }
+                });
+            });
+        });
     }
 
-    load(devEUI: string, mock: boolean) {
+    load(devEUI: string, mock: boolean): Promise<string> {
         console.log("Počítám statistiku pro: " + devEUI);
         let cRaService = new CRaService();
         let promise = cRaService.getDeviceInfo(devEUI);
 
-        promise.then((result) => {
-            this.processResult(result, devEUI, mock);
+        return new Promise<string>((resolve, reject) => {
+            promise.then((result) => {
+                this.processResult(result, devEUI, mock);
+                resolve(devEUI);
+            });
         });
     }
 

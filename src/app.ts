@@ -16,16 +16,29 @@ namespace UpdateCache {
   export let devEUIs: string[];
   export let mockDevEUIs: string[];
   export let startup: boolean = false;
+  export let startupProd: boolean = false;
+  export let startupMock: boolean = false;
 
   export function updateCache() {
+    this.startupProd = this.devEUIs == null || this.devEUIs.length == 0;
+    this.startupMock = this.mockDevEUIs == null || this.mockDevEUIs.length == 0;
+    console.warn(startupProd);
+    console.warn(startupMock);
     let loadStatistics = new SaveStatistics();
     if (devEUIs != null) {
-      loadStatistics.loadAll(devEUIs, false);
+      loadStatistics.loadAll(devEUIs, false).then((result) => {
+        this.startupProd = true;
+        this.startup = this.startupProd && this.startupMock;
+        console.error(this.startup);
+      });
     }
     if (mockDevEUIs != null) {
-      loadStatistics.loadAll(mockDevEUIs, true);
+      loadStatistics.loadAll(mockDevEUIs, true).then((result) => {
+        this.startupMock = true;
+        this.startup = this.startupProd && this.startupMock;
+        console.error(this.startup);
+      });
     }
-    this.startup = true;
   }
 }
 
@@ -116,9 +129,9 @@ class Server {
 
   private startUpGet(req: any, res: any, next: any) {
     if (UpdateCache.startup) {
-      res.send("Service is started");
+      res.status(200).send();
     } else {
-      res.status(503).send("Service starts");
+      res.status(503).send();
     }
   }
 }
