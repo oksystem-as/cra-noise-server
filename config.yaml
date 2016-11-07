@@ -1,5 +1,5 @@
 token: "kBPIDfNdSfk8fkATerBa6ct6yshdPbOX"
-basePath: "http://hndocker.oksystem.local:58080"
-serverPort: 8080
+basePath: "http://localhost:8082"
+serverPort: 8081
 devEUIs:
 - "0004A30B0019D0EA"
