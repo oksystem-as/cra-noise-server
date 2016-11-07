@@ -8,12 +8,14 @@ import * as express from "express";
 import { SaveStatistics } from "./services/SaveStatistics";
 import { LoadDevideConfig, CRaApiConfig } from "./Config";
 import * as winston from "winston";
+import { ServerResponse } from "http";
 var expressWinston = require("express-winston");
 require("console-winston")();
 
 namespace UpdateCache {
   export let devEUIs: string[];
   export let mockDevEUIs: string[];
+  export let startup: boolean = false;
 
   export function updateCache() {
     let loadStatistics = new SaveStatistics();
@@ -23,6 +25,7 @@ namespace UpdateCache {
     if (mockDevEUIs != null) {
       loadStatistics.loadAll(mockDevEUIs, true);
     }
+    this.startup = true;
   }
 }
 
@@ -46,6 +49,7 @@ class Server {
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         next();
     });
+    this.configStatusConfig();
     this.configCache();
     this.routes();
   }
@@ -60,7 +64,7 @@ class Server {
     UpdateCache.mockDevEUIs = cacheConfig.mockDevEUIs;
 
     UpdateCache.updateCache();
-    /*
+
     setInterval(function() {
       try {
         UpdateCache.updateCache();
@@ -68,7 +72,6 @@ class Server {
         console.error(error);
       }
     }, LoadDevideConfig.updateInterval);
-    */
   }
 
   private routes() {
@@ -105,6 +108,18 @@ class Server {
       expressFormat: true,
       colorize: true
     }));
+  }
+
+  private configStatusConfig() {
+    this.app.get("/startup", this.startUpGet);
+  }
+
+  private startUpGet(req: any, res: any, next: any) {
+    if (UpdateCache.startup) {
+      res.send("Service is started");
+    } else {
+      res.status(503).send("Service starts");
+    }
   }
 }
 
