@@ -70,6 +70,9 @@ class Server {
     if (cacheConfig.token !== undefined && cacheConfig.token !== null) {
       CRaApiConfig.token = cacheConfig.token;
     }
+    if (cacheConfig.basePath !== undefined && cacheConfig.basePath !== null) {
+      CRaApiConfig.basePath = cacheConfig.basePath;
+    }
     UpdateCache.devEUIs = cacheConfig.devEUIs;
     UpdateCache.mockDevEUIs = cacheConfig.mockDevEUIs;
 
