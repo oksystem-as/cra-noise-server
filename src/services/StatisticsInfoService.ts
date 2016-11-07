@@ -87,7 +87,7 @@ class StatisticsInfoService {
             let avgValueLast30 = StatisticsUtils.resolveLogAverange(resultLast30);
             let isCompleteLast30 = resultLast30.length == 30 && resultLast30.find((value) => !value.isComplete) == null;
             let countLast30 = this.countMes(resultLast30);
-            let dateSrtLast30 = this.dateToString(lastMonthDate);
+            let dateSrtLast30 = DateUtils.dateToString(lastMonthDate);
             resultData.push({ type: StatisType.MONTH, avgValues: [ { date: dateSrtLast30,
                                                                      avgValue: avgValueLast30,
                                                                      isComplete: isCompleteLast30,
@@ -97,7 +97,7 @@ class StatisticsInfoService {
             let avgValueLast7 = StatisticsUtils.resolveLogAverange(resultLast7);
             let isCompleteLast7 = resultLast7.length == 7 && resultLast7.find((value) => !value.isComplete) == null;
             let countLast7 = this.countMes(resultLast7);
-            let dateSrtLast7 = this.dateToString(lastWeekDate);
+            let dateSrtLast7 = DateUtils.dateToString(lastWeekDate);
             resultData.push({ type: StatisType.WEEK, avgValues: [ { date: dateSrtLast7,
                                                                     avgValue: avgValueLast7,
                                                                     isComplete: isCompleteLast7,
@@ -132,26 +132,13 @@ class StatisticsInfoService {
             let avgValues = [];
             value.avgValues.forEach(avgValue => {
                 let date: Date = avgValue.date;
-                let dateSrt = this.dateToString(date);
+                let dateSrt = DateUtils.dateToString(date);
                 avgValues.push({ date: dateSrt, avgValue: avgValue.avgValue, isComplete: avgValue.isComplete, count: avgValue.count });
             });
             let statRes = { type: value.type, avgValues: avgValues };
             resultData.push(statRes);
         });
         return resultData;
-    }
-
-    private dateToString(date: Date): String {
-        let dateSrt = this.twoDigits(date.getFullYear()) + "-" + this.twoDigits(date.getMonth() + 1) + "-" + this.twoDigits(date.getDate()) + "T" +
-                        this.twoDigits(date.getHours()) + ":" + this.twoDigits(date.getMinutes()) + ":" + this.twoDigits(date.getSeconds());
-        return dateSrt;
-    }
-
-    private twoDigits(num: number): String {
-        if (num < 10) {
-            return "0" + num;
-        }
-        return num.toString();
     }
 }
 

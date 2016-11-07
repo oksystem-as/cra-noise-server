@@ -22,21 +22,18 @@ namespace UpdateCache {
   export function updateCache() {
     this.startupProd = this.devEUIs == null || this.devEUIs.length == 0;
     this.startupMock = this.mockDevEUIs == null || this.mockDevEUIs.length == 0;
-    console.warn(startupProd);
-    console.warn(startupMock);
+
     let loadStatistics = new SaveStatistics();
     if (devEUIs != null) {
-      loadStatistics.loadAll(devEUIs, false).then((result) => {
+      loadStatistics.loadAll(devEUIs, false, !startup).then((result) => {
         this.startupProd = true;
         this.startup = this.startupProd && this.startupMock;
-        console.error(this.startup);
       });
     }
     if (mockDevEUIs != null) {
-      loadStatistics.loadAll(mockDevEUIs, true).then((result) => {
+      loadStatistics.loadAll(mockDevEUIs, true, !startup).then((result) => {
         this.startupMock = true;
         this.startup = this.startupProd && this.startupMock;
-        console.error(this.startup);
       });
     }
   }

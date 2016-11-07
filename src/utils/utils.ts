@@ -164,6 +164,19 @@ export class DateUtils {
         date.setMilliseconds(999);
         return date;
     }
+
+    public static dateToString(date: Date): string {
+        let dateSrt = this.twoDigits(date.getFullYear()) + "-" + this.twoDigits(date.getMonth() + 1) + "-" + this.twoDigits(date.getDate()) + "T" +
+                        this.twoDigits(date.getHours()) + ":" + this.twoDigits(date.getMinutes()) + ":" + this.twoDigits(date.getSeconds());
+        return dateSrt;
+    }
+
+    public static twoDigits(num: number): string {
+        if (num < 10) {
+            return "0" + num;
+        }
+        return num.toString();
+    }
 }
 
 export class ObjectUtils {

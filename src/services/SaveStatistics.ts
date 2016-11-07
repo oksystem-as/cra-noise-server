@@ -21,11 +21,11 @@ export class SaveStatistics {
         this.statisticsData = DBLoki.statisticsData;
     }
 
-    loadAll(devEUIs: string[], mock: boolean): Promise<boolean> {
+    loadAll(devEUIs: string[], mock: boolean, init: boolean): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             let devEUIsComplete = Array<string>();
             devEUIs.forEach(devEUI => {
-                this.load(devEUI, mock).then((result) => {
+                this.load(devEUI, mock, init).then((result) => {
                     if (devEUIsComplete.find((valeu) => valeu === result) == null) {
                         devEUIsComplete.push(result);
                     }
@@ -37,20 +37,28 @@ export class SaveStatistics {
         });
     }
 
-    load(devEUI: string, mock: boolean): Promise<string> {
+    load(devEUI: string, mock: boolean, init: boolean): Promise<string> {
         console.log("Počítám statistiku pro: " + devEUI);
         let cRaService = new CRaService();
-        let promise = cRaService.getDeviceInfo(devEUI);
+        let promise;
+        if (init) {
+            promise = cRaService.getDeviceInfo(devEUI);
+        } else {
+            let start = new Date();
+            start = DateUtils.getMonthFlatDate(start);
+            start = DateUtils.getWeekFlatDate(start);
+            promise = cRaService.getDeviceInfo(devEUI, DateUtils.dateToString(start));
+        }
 
         return new Promise<string>((resolve, reject) => {
             promise.then((result) => {
-                this.processResult(result, devEUI, mock);
+                this.processResult(result, devEUI, mock, init);
                 resolve(devEUI);
             });
         });
     }
 
-    private processResult(result: Result, devEUI: string, mock: boolean) {
+    private processResult(result: Result, devEUI: string, mock: boolean, init: boolean) {
         let res = new DeSenseNoisePayloadResolver();
         let sensor = new Sensor();
         sensor.devEUI = devEUI;
@@ -69,42 +77,44 @@ export class SaveStatistics {
             payload.payloadType = sensor.payloadType;
             sensor.payloads.push(payload);
         });
-        this.processStatistics(sensor);
+        this.processStatistics(sensor, init);
     }
 
-    private processStatistics(sensor: Sensor) {
+    private processStatistics(sensor: Sensor, init: boolean) {
         StatisticsUtils.resolveLogAverangeListEvent(sensor, StatisType.HOUR).subscribe(list => {
-            this.saveStatistics(list, sensor.devEUI, StatisType.HOUR);
+            this.saveStatistics(list, sensor.devEUI, StatisType.HOUR, init);
             console.log("Hodinové statistiky spočítané.");
         });
         StatisticsUtils.resolveLogAverangeListEvent(sensor, StatisType.DAY6_22).subscribe(list => {
-            this.saveStatistics(list, sensor.devEUI, StatisType.DAY6_22);
+            this.saveStatistics(list, sensor.devEUI, StatisType.DAY6_22, init);
             console.log("Denní od 6 do 22 statistiky spočítané.");
         });
         StatisticsUtils.resolveLogAverangeListEvent(sensor, StatisType.DAY18_22).subscribe(list => {
-            this.saveStatistics(list, sensor.devEUI, StatisType.DAY18_22);
+            this.saveStatistics(list, sensor.devEUI, StatisType.DAY18_22, init);
             console.log("Denní od 18 do 22 statistiky spočítané.");
         });
         StatisticsUtils.resolveLogAverangeListEvent(sensor, StatisType.NIGHT22_6).subscribe(list => {
-            this.saveStatistics(list, sensor.devEUI, StatisType.NIGHT22_6);
+            this.saveStatistics(list, sensor.devEUI, StatisType.NIGHT22_6, init);
             console.log("Noční od 22 do 6 statistiky spočítané.");
         });
         StatisticsUtils.resolveLogAverangeListEvent(sensor, StatisType.DAY24).subscribe(list => {
-            this.saveStatistics(list, sensor.devEUI, StatisType.DAY24);
+            this.saveStatistics(list, sensor.devEUI, StatisType.DAY24, init);
             console.log("Denní statistiky spočítané.");
         });
         StatisticsUtils.resolveLogAverangeListEvent(sensor, StatisType.WEEK).subscribe(list => {
-            this.saveStatistics(list, sensor.devEUI, StatisType.WEEK);
+            this.saveStatistics(list, sensor.devEUI, StatisType.WEEK, init);
             console.log("Týdenní statistiky spočítané.");
         });
         StatisticsUtils.resolveLogAverangeListEvent(sensor, StatisType.MONTH).subscribe(list => {
-            this.saveStatistics(list, sensor.devEUI, StatisType.MONTH);
+            this.saveStatistics(list, sensor.devEUI, StatisType.MONTH, init);
             console.log("Měsíční statistiky spočítané.");
         });
     }
 
-    private saveStatistics(statistics: Statistic[], devEUI: string, statisType: StatisType) {
-        this.statisticsData.removeWhere((data) => data.devEUI === devEUI && data.statisType === statisType);
+    private saveStatistics(statistics: Statistic[], devEUI: string, statisType: StatisType, init: boolean) {
+        let start = new Date();
+        start = DateUtils.getMonthFlatDate(start);
+
         statistics.forEach(statistic => {
             let time = statistic.time;
             let logAverange = statistic.logAverange;
@@ -118,7 +128,11 @@ export class SaveStatistics {
                                 + ", logAverange: " + stat.logAverange
                                 + ", isComplete: " + stat.isComplete
                                 + ", count: " + stat.count);
-            this.statisticsData.insert(stat);
+            if (init || stat.time.getTime() >= start.getTime()) {
+                this.statisticsData.removeWhere((data) => data.devEUI === devEUI && data.statisType === statisType
+                                                            && data.time.getTime() == stat.time.getTime());
+                this.statisticsData.insert(stat);
+            }
         });
     }
 }

@@ -20,7 +20,7 @@ export class CRaService {
    * @param start Omezení výpisu zpráv od konkrétního data. Formát 2016-01-01T01:50:50. Zprávy jsou ukládány v časovém pásmu Europe/Prague.
    * @param stop Omezení výpisu zpráv do konkrétního data. Formát 2016-01-01T01:50:50. Zprávy jsou ukládány v časovém pásmu Europe/Prague.
   */
-  public getDeviceInfo(devEUI: string, limit?: number, start?: string, order?: string, offset?: number, stop?: string): Promise<Result> {
+  public getDeviceInfo(devEUI: string, start?: string, limit?: number, order?: string, offset?: number, stop?: string): Promise<Result> {
         const localVarPath = this.basePath + this.deviceDetailBaseUrl.replace("{" + "devEUI" + "}", String(devEUI));
         let queryParameters: any = {};
 
