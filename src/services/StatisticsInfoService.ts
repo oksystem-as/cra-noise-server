@@ -115,7 +115,7 @@ class StatisticsInfoService {
 
     private getAllData(devEUI: string) {
         let result = this.statisticsData.chain().where((data) => data.devEUI === devEUI);
-        return this.transformToResultData(result.data());
+        return this.transformToResultData(result.data().sort((a, b) => a.time.getTime() - b.time.getTime() ));
     }
 
     private transformToResultData(result: StatisticsInfo[]): any[] {
