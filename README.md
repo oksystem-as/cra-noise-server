@@ -1,2 +1,1 @@
-# cra-noise-server
-server pro cra-noise-map
+# cra-noise-statis-server

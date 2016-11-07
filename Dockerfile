@@ -15,5 +15,5 @@ RUN ls -l
 
 RUN npm install --production
 
-EXPOSE 8080
+EXPOSE 8081
 CMD [ "npm", "start" ]
