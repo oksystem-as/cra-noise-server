@@ -21,11 +21,11 @@ export class SaveStatistics {
         this.statisticsData = DBLoki.statisticsData;
     }
 
-    loadAll(devEUIs: string[], mock: boolean, init: boolean): Promise<boolean> {
+    loadAll(devEUIs: string[], init: boolean): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             let devEUIsComplete = Array<string>();
             devEUIs.forEach(devEUI => {
-                this.load(devEUI, mock, init).then((result) => {
+                this.load(devEUI, init).then((result) => {
                     if (devEUIsComplete.find((valeu) => valeu === result) == null) {
                         devEUIsComplete.push(result);
                     }
@@ -37,7 +37,7 @@ export class SaveStatistics {
         });
     }
 
-    load(devEUI: string, mock: boolean, init: boolean): Promise<string> {
+    load(devEUI: string, init: boolean): Promise<string> {
         console.log("Počítám statistiku pro: " + devEUI);
         let cRaService = new CRaService();
         let promise;
@@ -52,27 +52,19 @@ export class SaveStatistics {
 
         return new Promise<string>((resolve, reject) => {
             promise.then((result) => {
-                this.processResult(result, devEUI, mock, init);
+                this.processResult(result, devEUI, init);
                 resolve(devEUI);
             });
         });
     }
 
-    private processResult(result: Result, devEUI: string, mock: boolean, init: boolean) {
+    private processResult(result: Result, devEUI: string, init: boolean) {
         let res = new DeSenseNoisePayloadResolver();
         let sensor = new Sensor();
         sensor.devEUI = devEUI;
         sensor.payloadType = PayloadType.DeSenseNoise;
         result.records.forEach((value) => {
-            let payload;
-            if (mock) {
-                payload = { noise: Math.floor(((Math.random() * 100))),
-                            battery: Math.floor(((Math.random() * 100))),
-                            rssi: Math.floor(((Math.random() * 100))),
-                            snr: Math.floor(((Math.random() * 100))) };
-            } else {
-                payload = res.resolve(value.payloadHex);
-            }
+            let payload = res.resolve(value.payloadHex);
             payload.createdAt = DateUtils.parseDate(value.createdAt);
             payload.payloadType = sensor.payloadType;
             sensor.payloads.push(payload);

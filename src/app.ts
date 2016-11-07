@@ -14,26 +14,13 @@ require("console-winston")();
 
 namespace UpdateCache {
   export let devEUIs: string[];
-  export let mockDevEUIs: string[];
   export let startup: boolean = false;
-  export let startupProd: boolean = false;
-  export let startupMock: boolean = false;
 
   export function updateCache() {
-    this.startupProd = this.devEUIs == null || this.devEUIs.length == 0;
-    this.startupMock = this.mockDevEUIs == null || this.mockDevEUIs.length == 0;
-
     let loadStatistics = new SaveStatistics();
     if (devEUIs != null) {
-      loadStatistics.loadAll(devEUIs, false, !startup).then((result) => {
-        this.startupProd = true;
-        this.startup = this.startupProd && this.startupMock;
-      });
-    }
-    if (mockDevEUIs != null) {
-      loadStatistics.loadAll(mockDevEUIs, true, !startup).then((result) => {
-        this.startupMock = true;
-        this.startup = this.startupProd && this.startupMock;
+      loadStatistics.loadAll(devEUIs, !startup).then((result) => {
+        startup = true;
       });
     }
   }
@@ -78,7 +65,6 @@ class Server {
       CRaApiConfig.serverPort = cacheConfig.serverPort;
     }
     UpdateCache.devEUIs = cacheConfig.devEUIs;
-    UpdateCache.mockDevEUIs = cacheConfig.mockDevEUIs;
 
     UpdateCache.updateCache();
 
