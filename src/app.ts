@@ -62,6 +62,7 @@ class Server {
     this.configStatusConfig();
     this.configCache();
     this.routes();
+    this.app.listen(CRaApiConfig.serverPort);
   }
 
   private configCache() {
@@ -72,6 +73,9 @@ class Server {
     }
     if (cacheConfig.basePath !== undefined && cacheConfig.basePath !== null) {
       CRaApiConfig.basePath = cacheConfig.basePath;
+    }
+    if (cacheConfig.serverPort !== undefined && cacheConfig.serverPort !== null) {
+      CRaApiConfig.serverPort = cacheConfig.serverPort;
     }
     UpdateCache.devEUIs = cacheConfig.devEUIs;
     UpdateCache.mockDevEUIs = cacheConfig.mockDevEUIs;

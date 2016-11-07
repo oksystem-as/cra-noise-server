@@ -16,4 +16,5 @@ export namespace CRaApiConfig {
     export const deviceDetailBaseUrl = "/message/get/{devEUI}";
     export const limit = 10000 ;
     export let token = "";
+    export let serverPort = 8080;
 }
