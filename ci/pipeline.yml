@@ -114,7 +114,7 @@ resources:
 - name: source
   type: git
   source:
-    uri: https://github.com/oksystem-as/cra-noise-server.git
+    uri: https://github.com/oksystem-as/cra-noise-statis-server.git
     username: {{username}}
     password: {{password}}
     branch: master
@@ -123,7 +123,7 @@ resources:
   type: semver
   source:
     driver: git
-    uri: https://github.com/oksystem-as/cra-noise-server.git
+    uri: https://github.com/oksystem-as/cra-noise-statis-server.git
     branch: master
     file: version
     username: {{username}}
@@ -146,6 +146,7 @@ jobs:
     - get: source
       passed: [build]
     - get: version
+      trigger: true
   - task: build
     file: source/ci/tasks/build.yml                  
   - put: registry-release
@@ -153,7 +154,12 @@ jobs:
       build: binaries
       tag: version/version
       tag_as_latest: true
-    attempts: 3  
+    attempts: 3
+  - put: source
+    params:
+      repository: source
+      only_tag: true
+      tag: version/version
 - name: major
   serial_groups: [ version ]
   plan:
