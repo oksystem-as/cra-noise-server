@@ -11,6 +11,7 @@ import * as winston from "winston";
 import { ServerResponse } from "http";
 var expressWinston = require("express-winston");
 require("console-winston")();
+import request = require("request");
 
 namespace UpdateCache {
   export let devEUIs: string[];
@@ -66,6 +67,25 @@ class Server {
     }
     UpdateCache.devEUIs = cacheConfig.devEUIs;
 
+    this.chceckStartupCache();
+  }
+
+  private chceckStartupCache() {
+    request.get(CRaApiConfig.basePath + "/startup", (error, response, body) => {
+      if (error) {
+        console.log("Cache není dostupná.");
+        this.chceckStartupCache();
+      } else {
+        if (response.statusCode === 200) {
+          this.startup();
+        } else {
+          this.chceckStartupCache();
+        }
+      }
+    });
+  }
+
+  private startup() {
     UpdateCache.updateCache();
 
     setInterval(function() {
