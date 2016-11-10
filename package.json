@@ -6,7 +6,8 @@
     "grunt": "grunt",
     "typings": "typings",
     "start": "node ./bin/server",
-    "postinstall": "npm run typings install"
+    "postinstall": "npm run typings install",
+    "prod_start": "npm install --production && npm start"
   },
   "author": "",
   "dependencies": {
