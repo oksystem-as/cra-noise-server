@@ -128,6 +128,12 @@ resources:
     file: version
     username: {{username}}
     password: {{password}}    
+- name: gh-release
+  type: github-release
+  source:
+    user: oksystem-as
+    repository: cra-noise-cache-server
+    access_token: {{ghtoken}}    
 
 jobs:
 - name: build
@@ -148,7 +154,9 @@ jobs:
     - get: version
       trigger: true
   - task: build
-    file: source/ci/tasks/build.yml                  
+    file: source/ci/tasks/build.yml
+  - task: package
+    file: source/ci/tasks/package.yml                    
   - put: registry-release
     params:
       build: binaries
@@ -160,6 +168,12 @@ jobs:
       repository: source
       only_tag: true
       tag: version/version
+  - put: gh-release
+    params:
+      name: version/version
+      tag: version/version
+      globs:
+      - package/binaries.tar    
 - name: major
   serial_groups: [ version ]
   plan:
