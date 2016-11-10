@@ -17,8 +17,6 @@ run:
     args:
       - -exc
       - |
-        ls -l
-        cd binaries
         pwd
         ls -l
         tar -czvf package/cra-noise-cache-server.tar.gz binaries
