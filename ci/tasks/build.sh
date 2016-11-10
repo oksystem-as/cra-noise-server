@@ -13,4 +13,5 @@ cp -R ./dist ../binaries/
 cp ./config.yaml ../binaries/
 cp ./package.json ../binaries/
 cp ./Dockerfile ../binaries/
+cp ./start.bat ../binaries/
 ls -l ../binaries/
