@@ -2,6 +2,8 @@ token: "kBPIDfNdSfk8fkATerBa6ct6yshdPbOX"
 basePath: "http://localhost:8082"
 serverPort: 8081
 devEUIs:
+- "0004A30B0019B1CA"
+- "0004A30B0019B046"
 - "0004A30B0019D0EA"
 - "0004A30B0019D0EB"
 - "0004A30B0019D0EC"
