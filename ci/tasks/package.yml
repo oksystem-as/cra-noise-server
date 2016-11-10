@@ -19,6 +19,6 @@ run:
       - |
         pwd
         ls -l
-        tar -czvf package/cra-noise-cache-server.tar.gz binaries
+        tar -czvf package/cra-noise-statis-server.tar.gz binaries
         ls -l package
-        tar -tvf package/cra-noise-cache-server.tar.gz
+        tar -tvf package/cra-noise-statis-server.tar.gz
