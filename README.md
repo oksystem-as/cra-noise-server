@@ -6,7 +6,7 @@ Služba pro vypočet statistických hodnot z hlukových čidel.
 Konfigurace je uložena v `config.yaml`.
 Nastavuje se zde:  
 `token` pro přístup k senzorům.  
-`basePath` urřčující kde běží služba poskytující data ze senzorů.
+`basePath` určující kde běží služba poskytující data ze senzorů.
 `serverPort` pod kterým se má nastartovat služba.
 Seznam `devEUIs` senzorů pro které se mají spočítat statistiky.
 
