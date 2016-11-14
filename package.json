@@ -1,6 +1,6 @@
 {
-  "name": "cra-noise-server",
-  "version": "0.1.0",
+  "name": "cra-noise-statis-server",
+  "version": "1.0.4",
   "description": "",
   "scripts": {
     "grunt": "grunt",
