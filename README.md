@@ -17,7 +17,8 @@ Pro spuštění i vývoj aplikace je potřeba mít nainstalovaný [Node.js]
 Pokud chcete službu spustit, stáhněte a rozbalte [poslední verzi]. A spusťte souborem `start.bat`, nebo příkazen `npm run prod_start`. 
 
 ## Vývoj
-Instalace balíčků: `npm install`  
+Instalace balíčků: `npm install`
+Instalace Ts definicí: `npm run typings install`  
 Build: `npm run grunt`
 
 ## Licence
